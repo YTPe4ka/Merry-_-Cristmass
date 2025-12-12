@@ -98,7 +98,7 @@ from rest_framework import permissions
 from rest_framework_simplejwt.views import TokenVerifyView
 
 from configapp.views import (
-    CategoryApi, CategoryDetailApi, EmailRegister,
+    CategoryApi, CategoryDetailApi, EmailRegister, SendEmailApi,
     SupplierApi, SupplierDetailApi,
     ProductApi, ProductDetailApi, UserRegister,EmailVerify
 )
@@ -154,6 +154,8 @@ urlpatterns = [
     path("", include(router.urls)),
     # todoits 
 
+    #email
+    path("sendemail/",SendEmailApi.as_view()),
     
 
 ]

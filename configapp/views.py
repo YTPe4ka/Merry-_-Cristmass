@@ -99,6 +99,7 @@
 
 
 
+from django.conf import settings
 from django.core.cache import cache
 import random
 import threading
@@ -108,12 +109,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from .models import Category, Supplier, Product, Todo
-from .serializers import CategorySerializer, SupplierSerializer, ProductSerializer ,EmailRegisterserializer, TodoSerializer,UserRegisterSerializer,EmailVerifySerializer,LoginSerializer
+from .serializers import CategorySerializer, SupplierSerializer, ProductSerializer ,EmailRegisterserializer, TodoSerializer,UserRegisterSerializer,EmailVerifySerializer,LoginSerializer,SendEmailSerializer
 from django.contrib.auth import  *
 from django.contrib.auth.models import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import viewsets, status
 from rest_framework import permissions
+from django.core.mail import send_mail
+from django.conf import settings
 # Category
 class CategoryApi(APIView):
     @swagger_auto_schema(responses={200: CategorySerializer(many=True)})
@@ -330,7 +333,6 @@ class UserRegister(APIView):
         else:   
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
 #////////////////////////////////
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -387,6 +389,17 @@ class TodoViewSet(viewsets.ModelViewSet):
 
 
 
+class SendEmailApi(APIView):
+    @swagger_auto_schema(request_body=SendEmailSerializer, responses={200: "Verification code sent to email"},operation_description="Send a verification code to the provided email.")
+    def post(self, request):
+        subject ='Test Email pernol'
+        message = request.data.get('text')
+        email = request.data.get('email')
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [f"{email}"] 
+        send_mail( subject, message, email_from, recipient_list )
+        return Response(data =f"{email}", status=status.HTTP_200_OK)
+    
 
 
 
@@ -396,6 +409,12 @@ class TodoViewSet(viewsets.ModelViewSet):
 
 
 
-
-
-
+ # qfxn wglj vtri lply
+# qfxn wglj vtri lply
+# qfxn wglj vtri lply
+# qfxn wglj vtri lply
+# qfxn wglj vtri lply
+# qfxn wglj vtri lply
+# qfxn wglj vtri lply
+# qfxn wglj vtri lply
+# qfxn wglj vtri lply

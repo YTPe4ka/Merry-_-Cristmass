@@ -76,3 +76,21 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 
+
+class SendEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    text = serializers.CharField()
+
+
+
+# class studentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'bio']
+
+# class teacherSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'bio']
+
+
