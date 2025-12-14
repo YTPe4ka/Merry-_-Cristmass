@@ -92,77 +92,93 @@
 
 from django.contrib import admin
 from django.urls import include, path
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-from rest_framework import permissions
-from rest_framework_simplejwt.views import TokenVerifyView
+from django.conf import settings
+from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
-from configapp.views import (
-    CategoryApi, CategoryDetailApi, EmailRegister, SendEmailApi,
-    SupplierApi, SupplierDetailApi,
-    ProductApi, ProductDetailApi, UserRegister,EmailVerify
-)
-from configapp.views import TodoViewSet, LoginView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
+    TokenVerifyView,
 )
 
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+
+from configapp import views as app_views
+from configapp.views import (
+    CategoryApi, CategoryDetailApi,
+    SupplierApi, SupplierDetailApi,
+    ProductApi, ProductDetailApi,
+    EmailRegister, EmailVerify, SendEmailApi,
+    UserRegister, LoginView,
+    TodoViewSet,
+)
+
+# ================== SWAGGER ==================
 schema_view = get_schema_view(
-   openapi.Info(
-      title="My API",
-      default_version='v1',
-      description="API docs",
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
+    openapi.Info(
+        title="My API",
+        default_version="v1",
+        description="API docs",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
 )
 
-
-
-
+# ================== ROUTER ==================
 router = DefaultRouter()
 router.register(r'todos', TodoViewSet, basename='todo')
+# register internal viewsets for public content editable via dashboard
+router.register(r'home', app_views.HomeViewSet, basename='home')
+router.register(r'about', app_views.AboutViewSet, basename='about')
+router.register(r'resume', app_views.ResumeViewSet, basename='resume')
+router.register(r'portfolio', app_views.PortfolioViewSet, basename='portfolio')
+router.register(r'services', app_views.ServiceViewSet, basename='services')
+router.register(r'skills', app_views.SkillViewSet, basename='skills')
+router.register(r'contact', app_views.ContactViewSet, basename='contact')
 
-
-
+# ================== URLS ==================
 urlpatterns = [
+
+    # ===== API =====
+    path('api/', include(router.urls)),
+    path('api/categories/', CategoryApi.as_view()),
+    path('api/categories/<int:pk>/', CategoryDetailApi.as_view()),
+    path('api/suppliers/', SupplierApi.as_view()),
+    path('api/suppliers/<int:pk>/', SupplierDetailApi.as_view()),
+    path('api/products/', ProductApi.as_view()),
+    path('api/products/<int:pk>/', ProductDetailApi.as_view()),
+
+    # ===== AUTH =====
+    path('api/token/', TokenObtainPairView.as_view()),
+    path('api/token/refresh/', TokenRefreshView.as_view()),
+    path('api/token/verify/', TokenVerifyView.as_view()),
+
+    path('api/register/', UserRegister.as_view()),
+    path('api/login/', LoginView.as_view()),
+    path('api/email/', EmailRegister.as_view()),
+    path('api/confirmemail/', EmailVerify.as_view()),
+    path('api/sendemail/', SendEmailApi.as_view()),
+
+    # ===== CUSTOM ADMIN =====
+    path('panel/login/', app_views.panel_login, name='panel-login'),
+    path('panel/dashboard/', app_views.panel_dashboard, name='panel-dashboard'),
+
+    # ===== SWAGGER =====
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0)),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0)),
+
+    # ===== SITE =====
+    path('', app_views.index, name='home'),
+    # Django admin
     path('admin/', admin.site.urls),
-
-    # swagger
-    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
-    # api
-    path('categories/', CategoryApi.as_view(), name='categories'),
-    path('categories/<int:pk>/', CategoryDetailApi.as_view(), name='category-detail'),
-    path('suppliers/', SupplierApi.as_view(), name='suppliers'),
-    path('suppliers/<int:pk>/', SupplierDetailApi.as_view(), name='supplier-detail'),
-    path('products/', ProductApi.as_view(), name='products'),
-    path('products/<int:pk>/', ProductDetailApi.as_view(), name='product-detail'),
-    # token
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    # register
-    path("email/",EmailRegister.as_view()),
-    path("confirmemail/",EmailVerify.as_view()),
-    path("register",UserRegister.as_view()),
-    path("login/", LoginView.as_view(), name="login"),
-    path("", include(router.urls)),
-    # todoits 
-
-    #email
-    path("sendemail/",SendEmailApi.as_view()),
-    
-
 ]
-    
 
-
-
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 

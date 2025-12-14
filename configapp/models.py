@@ -85,3 +85,100 @@ class Todo(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+
+
+# ///////////////////////////////////// about me :>
+
+from django.db import models
+
+class Home(models.Model):
+    name = models.CharField(max_length=150)
+    roles = models.CharField(max_length=255, blank=True)  # comma separated
+    background = models.ImageField(upload_to='hero/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+class About(models.Model):
+    title = models.CharField(max_length=150, blank=True)
+    description = models.TextField(blank=True)
+    birthday = models.CharField(max_length=50, blank=True)
+    website = models.URLField(blank=True)
+    phone = models.CharField(max_length=50, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(blank=True)
+    profile_image = models.ImageField(upload_to='about/', blank=True, null=True)
+
+    def __str__(self):
+        return "About"
+
+class ResumeEntry(models.Model):
+    section = models.CharField(max_length=50)  # 'education' or 'experience'
+    title = models.CharField(max_length=200)
+    date_from = models.CharField(max_length=50, blank=True)
+    date_to = models.CharField(max_length=50, blank=True)
+    company = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    order = models.IntegerField(default=0, help_text='Ordering for resume items; lower appear first')
+
+    def __str__(self):
+        return f"{self.section} - {self.title}"
+
+    class Meta:
+        ordering = ['order', '-id']
+
+class PortfolioItem(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    category = models.CharField(max_length=50, blank=True)
+    image = models.ImageField(upload_to='portfolio/', blank=True, null=True)
+    details_url = models.URLField(blank=True)
+
+    def __str__(self):
+        return self.title
+
+class Service(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    icon_class = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Skill(models.Model):
+    name = models.CharField(max_length=100)
+    level = models.IntegerField(default=50, help_text='Skill level as percent 0-100')
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return f"{self.name} ({self.level}%)"
+
+class ContactMessage(models.Model):
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"
+
+
+class ContactInfo(models.Model):
+    """Single-row editable contact information for footer/contact section."""
+    address = models.CharField(max_length=300, blank=True)
+    phone = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(blank=True)
+
+    def __str__(self):
+        return "Site contact info"
+
+    class Meta:
+        verbose_name = 'Contact Info'
+        verbose_name_plural = 'Contact Info'

@@ -418,3 +418,167 @@ class SendEmailApi(APIView):
 # qfxn wglj vtri lply
 # qfxn wglj vtri lply
 # qfxn wglj vtri lply
+
+
+# /////////////////////////////////// about me :>
+from rest_framework import viewsets, permissions
+from .models import Home, About, ResumeEntry, PortfolioItem, Service, ContactMessage, Skill
+from .serializers import (
+    HomeSerializer, AboutSerializer, ResumeEntrySerializer,
+    PortfolioItemSerializer, ServiceSerializer, ContactMessageSerializer, SkillSerializer,ContactInfoSerializer, ContactInfo
+)
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+from rest_framework.permissions import SAFE_METHODS, BasePermission
+from django.views.decorators.csrf import csrf_exempt
+from .models import Home, About, ResumeEntry, PortfolioItem, Service
+
+class ReadOnlyOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return bool(request.user and request.user.is_staff)
+
+class HomeViewSet(viewsets.ModelViewSet):
+    queryset = Home.objects.all()
+    serializer_class = HomeSerializer
+    permission_classes = [ReadOnlyOrAdmin]
+
+class AboutViewSet(viewsets.ModelViewSet):
+    queryset = About.objects.all()
+    serializer_class = AboutSerializer
+    permission_classes = [ReadOnlyOrAdmin]
+
+class ResumeViewSet(viewsets.ModelViewSet):
+    queryset = ResumeEntry.objects.all()
+    serializer_class = ResumeEntrySerializer
+    permission_classes = [ReadOnlyOrAdmin]
+
+class PortfolioViewSet(viewsets.ModelViewSet):
+    queryset = PortfolioItem.objects.all()
+    serializer_class = PortfolioItemSerializer
+    permission_classes = [ReadOnlyOrAdmin]
+
+class ServiceViewSet(viewsets.ModelViewSet):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    permission_classes = [ReadOnlyOrAdmin]
+
+class SkillViewSet(viewsets.ModelViewSet):
+    queryset = Skill.objects.all()
+    serializer_class = SkillSerializer
+    permission_classes = [ReadOnlyOrAdmin]
+
+class ContactViewSet(viewsets.ModelViewSet):
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+    permission_classes = [ReadOnlyOrAdmin]  
+
+
+# class ContactInfoViewSet(viewsets.ModelViewSet):
+#     queryset = ContactInfo.objects.all()
+#     serializer_class = ContactInfoSerializer
+#     permission_classes = [ReadOnlyOrAdmin]
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+
+
+def panel_login(request):
+    if request.method == 'POST':
+        user = authenticate(
+            request,
+            username=request.POST.get('username'),
+            password=request.POST.get('password')
+        )
+
+        if user and user.is_staff:
+            login(request, user)
+            return redirect('/panel/dashboard/')
+        else:
+            return render(request, 'admin_login.html', {
+                'error': 'Invalid credentials'
+            })
+
+    return render(request, 'admin_login.html')
+
+
+@login_required
+def panel_dashboard(request):
+    return render(request, 'dashboard.html')
+
+
+def index(request):
+    # load singletons and lists for the public site
+    home = Home.objects.first()
+    about = About.objects.first()
+    resume = ResumeEntry.objects.all().order_by('order', '-id')
+    portfolio = PortfolioItem.objects.all()
+    # ensure there's a portfolio card linking to API docs (swagger) so public site shows it
+    try:
+        if not portfolio.filter(details_url='/swagger/').exists():
+            PortfolioItem.objects.create(title='API Documentation', category='Docs', description='API docs and playground', details_url='/swagger/')
+            # requery to include the created item
+            portfolio = PortfolioItem.objects.all()
+    except Exception:
+        # ignore creation errors at runtime
+        portfolio = PortfolioItem.objects.all()
+    services = Service.objects.all().order_by('-id')
+    skills = Skill.objects.all().order_by('order', '-id')
+    # fallbacks from defaults.py
+    from . import defaults
+
+    hero_roles = None
+    if home and getattr(home, 'roles', None):
+        hero_roles = home.roles
+    else:
+        hero_roles = defaults.HERO_ROLES
+
+    about_desc = (about.description if about and getattr(about, 'description', None) else defaults.ABOUT_DESC)
+    skills_desc = defaults.SKILLS_DESC
+    resume_desc = defaults.RESUME_DESC
+    portfolio_desc = defaults.PORTFOLIO_DESC
+    services_desc = defaults.SERVICES_DESC
+
+    # build safe portfolio items with resolved image URLs (avoid broken/missing media files)
+    portfolio_items = []
+    from django.conf import settings as _settings
+    for p in portfolio:
+        image_url = ''
+        try:
+            if getattr(p, 'image', None) and getattr(p.image, 'name', None):
+                # accessing .url can raise ValueError if file is missing; guard it
+                try:
+                    image_url = p.image.url
+                except Exception:
+                    image_url = ''
+        except Exception:
+            image_url = ''
+        portfolio_items.append({
+            'id': p.id,
+            'title': p.title,
+            'description': p.description,
+            'details_url': p.details_url,
+            'image_url': image_url,
+            'category': p.category,
+        })
+
+    return render(request, 'index.html', {
+        'home': home,
+        'about': about,
+        'resume_entries': resume,
+        'portfolio_items': portfolio_items,
+        'services': services,
+        'skills': skills,
+        'hero_roles': hero_roles,
+        'about_desc': about_desc,
+        'skills_desc': skills_desc,
+        'resume_desc': resume_desc,
+        'portfolio_desc': portfolio_desc,
+        'services_desc': services_desc,
+    })

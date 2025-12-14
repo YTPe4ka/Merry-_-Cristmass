@@ -94,3 +94,49 @@ class SendEmailSerializer(serializers.Serializer):
 #         fields = ['first_name', 'last_name', 'username', 'email', 'avatar', 'bio']
 
 
+# ////////////////////////// about me :>
+from rest_framework import serializers
+from .models import Home, About, ResumeEntry, PortfolioItem, Service, ContactMessage, Skill
+
+class HomeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Home
+        fields = '__all__'
+
+class AboutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = About
+        fields = '__all__'
+
+class ResumeEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResumeEntry
+        fields = '__all__'
+
+class PortfolioItemSerializer(serializers.ModelSerializer):
+    details_url = serializers.URLField(required=False, allow_blank=True)
+    class Meta:
+        model = PortfolioItem
+        fields = '__all__'
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = '__all__'
+
+class SkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = '__all__'
+
+
+# class ContactInfoSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ContactInfo
+#         fields = '__all__'
+    
