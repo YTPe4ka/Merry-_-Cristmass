@@ -79,10 +79,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SendEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    text = serializers.CharField()
+    fromwho = serializers.CharField()
+    name = serializers.CharField()
+    subject =serializers.CharField()
+    message =serializers.CharField()
 
-
-
+# name = request.data.get('text')
+#         subject = request.data.get('text')
+#         fromwho = request.data.get('text')
+#         message = request.data.get('text')
+#         email = request.data.get('email')
 # class studentSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = User
@@ -135,7 +141,7 @@ class SkillSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class ContactInfoSerializer(serializers.ModelSerializer):
+# class (serializers.ModelSerializer):
 #     class Meta:
 #         model = ContactInfo
 #         fields = '__all__'

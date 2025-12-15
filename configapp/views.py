@@ -393,11 +393,14 @@ class SendEmailApi(APIView):
     @swagger_auto_schema(request_body=SendEmailSerializer, responses={200: "Verification code sent to email"},operation_description="Send a verification code to the provided email.")
     def post(self, request):
         subject ='Test Email pernol'
+        name = request.data.get('text')
+        subject = request.data.get('text')
+        fromwho = request.data.get('text')
         message = request.data.get('text')
         email = request.data.get('email')
         email_from = settings.EMAIL_HOST_USER
         recipient_list = [f"{email}"] 
-        send_mail( subject, message, email_from, recipient_list )
+        send_mail( subject, message, email_from, recipient_list ,fromwho,name)
         return Response(data =f"{email}", status=status.HTTP_200_OK)
     
 
@@ -425,7 +428,7 @@ from rest_framework import viewsets, permissions
 from .models import Home, About, ResumeEntry, PortfolioItem, Service, ContactMessage, Skill
 from .serializers import (
     HomeSerializer, AboutSerializer, ResumeEntrySerializer,
-    PortfolioItemSerializer, ServiceSerializer, ContactMessageSerializer, SkillSerializer,ContactInfoSerializer, ContactInfo
+    PortfolioItemSerializer, ServiceSerializer, ContactMessageSerializer, SkillSerializer, 
 )
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
